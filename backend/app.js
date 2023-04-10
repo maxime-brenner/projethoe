@@ -7,11 +7,11 @@ app.use((req, res) => {
 
 const mongoose = require('mongoose');
 
-mongoose.connect('mongodb+srv://maxime:aRC8fTL436CUZ4js@testmongo.tr8izuc.mongodb.net/?retryWrites=true&w=majority',
-/* {
+mongoose.connect('mongodb+srv://maxime:aRC8fTL436CUZ4js@testmongo.tr8izuc.mongodb.net/',
+{
     useNewUrlParser: true,
     useUnifiedTopology: true,
-} */
+} 
 )
 .then(() => console.log('Connexion à la base MongoDb réussie'))
 .catch(err => console.log(err))
