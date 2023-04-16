@@ -7,6 +7,8 @@ router.post('/create/', controller.createPatient);
 router.get('/get/:patientId', controller.readPatient);
 router.get('/get/', controller.readAllPatient);
 router.patch('/update/:patientId', controller.UpdatePatient);
+router.patch('/update/exams/:patientId', controller.UpdateExams);
 router.delete('/delete/:patientId', controller.DeletePatient);
+router.patch('/delete/exams/:patientId', controller.DeleteAllExams);
 
 export = router;

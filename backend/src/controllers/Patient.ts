@@ -1,6 +1,12 @@
 import { NextFunction, Request, Response} from "express";
 import mongoose from "mongoose";
 import Patient from "../models/Patient";
+import { IPatientModel } from "../models/Patient";
+import Examen from "../models/Biologie";
+
+function isType<IExamModel>(obj: any): obj is IExamModel {
+    return obj !== undefined
+}
 
 const createPatient = (req: Request, res: Response, next: NextFunction) => {
     const { name, firstName, birthDate} = req.body;
@@ -10,7 +16,6 @@ const createPatient = (req: Request, res: Response, next: NextFunction) => {
         name,
         firstName,
         birthDate,
-
     });
 
     return patient.save()
@@ -41,9 +46,8 @@ const UpdatePatient = (req: Request, res: Response, next: NextFunction) => {
         {
             patient.set(req.body)
             return patient.save()
-                .then(author => res.status(201).json({ patient}))
+                .then(patient => res.status(201).json({patient}))
                 .catch(error => res.status(500).json({error}));
-
         }
         else
         {
@@ -51,6 +55,48 @@ const UpdatePatient = (req: Request, res: Response, next: NextFunction) => {
         }
     })
     .catch(error => res.status(500).json({error}));
+};
+
+const UpdateExams = (req: Request, res: Response, next: NextFunction) => {
+    const patientId = req.params.patientId
+
+    return Patient.findById(patientId)
+    .then((pat) => {
+        if (pat) 
+        {   
+
+            try {
+                const {name, units, value, date, patient} = req.body;
+                const exam = new Examen({
+                    name,
+                    units,
+                    value,
+                    date,
+                    patient
+                });
+
+                try {
+                    exam.save()
+                } catch(error){
+                    res.status(400).json({ message: 'Requête invalide', error})
+                }
+                
+                pat.exams.push(exam)
+                return pat.save()
+                .then((pat: IPatientModel) => res.status(201).json({message:`Examens ajouté avec succès au patient${pat}`}))
+                .catch((error: any) => res.status(500).json({error}));
+            }
+            catch (error)
+            {   
+                console.log(error)
+            }
+                      
+        }
+        else
+        {
+            res.status(404).json({ message: 'Patient non trouvé' })
+        }
+    })
 };
 
 const DeletePatient = (req: Request, res: Response, next: NextFunction) => {
@@ -61,4 +107,19 @@ const DeletePatient = (req: Request, res: Response, next: NextFunction) => {
     .catch(error => res.status(500).json({error}));
 };
 
-export default {createPatient, readAllPatient, readPatient, UpdatePatient, DeletePatient};
+const DeleteAllExams = (req: Request, res: Response, next: NextFunction) => {
+    const patientId = req.params.patientId
+
+    return Patient.findById(patientId)
+    .then((patient) => {
+        if (patient) 
+        {
+            patient.set({exams: []})
+            return patient.save()
+            .then(patient => res.status(201).json({message:`Examens supprimés avec succès au patient${patient}`}))
+            .catch(error => res.status(500).json({error}));
+        }
+    })
+}
+
+export default {createPatient, readAllPatient, readPatient, UpdatePatient, UpdateExams, DeletePatient, DeleteAllExams};
