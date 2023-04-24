@@ -1,8 +1,10 @@
-import { NextFunction, Request, Response} from "express";
+import { NextFunction, Request, Response, request} from "express";
 import mongoose from "mongoose";
 import Patient from "../models/Patient";
 import { IPatientModel } from "../models/Patient";
-import Examen from "../models/Biologie";
+import Examen, {IExamModel} from "../models/Biologie";
+import { Schema } from "mongoose";
+import { exist } from "joi";
 
 function isType<IExamModel>(obj: any): obj is IExamModel {
     return obj !== undefined
@@ -122,4 +124,23 @@ const DeleteAllExams = (req: Request, res: Response, next: NextFunction) => {
     })
 }
 
-export default {createPatient, readAllPatient, readPatient, UpdatePatient, UpdateExams, DeletePatient, DeleteAllExams};
+const TestTypeChecking = (req: Request, res: Response, next: NextFunction) => {
+    
+    try
+    {   
+        const dataTest: IExamModel= req.body
+        function isExam(request: any): any{
+            const test = new Examen(dataTest)
+            test.save()
+            console.log(test instanceof Examen, test)
+        }
+        const request = req.body
+        return res.status(200).json({ message: "La requête est du bon type", isExam: isExam(request), req: req.body})
+    } 
+    catch(error) 
+    {
+        return res.status(500).json({ message: "La requête n'est pas du bon type" })
+    }
+}
+
+export default {createPatient, readAllPatient, readPatient, UpdatePatient, UpdateExams, DeletePatient, DeleteAllExams, TestTypeChecking};

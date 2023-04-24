@@ -11,4 +11,8 @@ router.patch('/update/exams/:patientId', controller.UpdateExams);
 router.delete('/delete/:patientId', controller.DeletePatient);
 router.patch('/delete/exams/:patientId', controller.DeleteAllExams);
 
+/* Test */
+
+router.get('/testType/', controller.TestTypeChecking)
+
 export = router;
