@@ -23,7 +23,7 @@ function PatientsList () {
             <h1>Liste des patients</h1>
             <ul>
                 {patients.map(function (pat){ 
-                return <a href={`/patient-id/${pat._id}`}><li key={pat._id}>{pat.name} {pat.firstName} {Date.parse(pat.birthDate)}</li></a>;
+                return <a href={`/patient-id/${pat._id}`}><li key={pat._id}>{pat.name} {pat.firstName} {new Date(pat.birthDate).toLocaleDateString()}</li></a>;
                     }
                 )};
             </ul>

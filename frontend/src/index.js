@@ -4,6 +4,9 @@ import ReactDOM from 'react-dom/client';
 import reportWebVitals from './reportWebVitals';
 import PatientsList from './components/patientsList';
 import PatientDetail from './components/patientDetail';
+import CodePage from './components/code';
+import NavBar from './components/navBar';
+import MedicamentsPage from './components/medicaments';
 
 const rooter = Router([
   {
@@ -14,11 +17,20 @@ const rooter = Router([
     path:"/patient-id/:patientId",
     element: <PatientDetail />,
   },
+  {
+    path:"/code-manager/",
+    element: <CodePage/>
+  },
+  {
+    path:"/medoc/",
+    element:<MedicamentsPage/>
+  }
 ]);
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
+    <NavBar/>
     <Route router={rooter}/>
   </React.StrictMode>
 );

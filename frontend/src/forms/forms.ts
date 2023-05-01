@@ -1,5 +1,4 @@
 import * as Yup from 'yup';
-import { parse } from 'date-fns';
 import axios from 'axios';
 
 function todayDate(): string {
@@ -38,4 +37,4 @@ const examForm = () => {
     }
 };
 
-export default examForm
+export default examForm;
