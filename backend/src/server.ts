@@ -4,6 +4,8 @@ import mongoose from "mongoose";
 import { config } from "./config/config";
 import Logging from "./library/Logging";
 import patientRoutes from './routes/Patient';
+import codeRoutes from './routes/CIM';
+import biologieRoutes from './routes/Biologie';
 
 const router = express();
 
@@ -20,7 +22,6 @@ mongoose.connect(config.mongo.url, { retryWrites:true, w: 'majority'})
 const StartServer = () => {
     router.use((req, res, next) => {
         Logging.info(`Incoming -> Method [${req.method}] - Url: [${req.url}] - IP: [${req.socket.remoteAddress}]`);
-
         res.on('finish', () => {
             Logging.info(`Incoming -> Method [${req.method}] - Url: [${req.url}] - IP: [${req.socket.remoteAddress}] - Status: [${res.statusCode}]`);
         });
@@ -44,6 +45,8 @@ const StartServer = () => {
     });
 
     router.use('/patient', patientRoutes);
+    router.use('/cim', codeRoutes);
+    router.use('/biologie', biologieRoutes);
 
     router.get('/ping', (req, res, next) => res.status(200).json({ message: 'Ok'}))
 

@@ -2,13 +2,10 @@ import { NextFunction, Request, Response, request} from "express";
 import mongoose from "mongoose";
 import Patient from "../models/Patient";
 import { IPatientModel } from "../models/Patient";
-import Examen, {IExamModel} from "../models/Biologie";
 import { Schema } from "mongoose";
 import { exist } from "joi";
 
-function isType<IExamModel>(obj: any): obj is IExamModel {
-    return obj !== undefined
-}
+const {ExamenPatient} = require('../models/Biologie');
 
 const createPatient = (req: Request, res: Response, next: NextFunction) => {
     const { name, firstName, birthDate} = req.body;
@@ -46,7 +43,7 @@ const UpdatePatient = (req: Request, res: Response, next: NextFunction) => {
     .then((patient) => {
         if (patient)
         {
-            patient.set(req.body)
+            patient.set(req.body);
             return patient.save()
                 .then(patient => res.status(201).json({patient}))
                 .catch(error => res.status(500).json({error}));
@@ -60,6 +57,27 @@ const UpdatePatient = (req: Request, res: Response, next: NextFunction) => {
 };
 
 const UpdateExams = (req: Request, res: Response, next: NextFunction) => {
+    const patientId = req.params.patientId
+
+    return Patient.findById(patientId)
+    .then((pat) => {
+        if (pat) 
+        {   
+            const check= pat.exams.find((obj) => {obj._id===req.body;});
+            if (check){
+                return res.json({message: 'l examen existe', body:req.body, exam:pat.exams, condition:check});
+            } else {
+                return res.json({message: 'l examen n existe pas', body:req.body, exam:pat.exams, condition:check});
+            }         
+        }
+        else
+        {
+            res.status(404).json({ message: 'Patient non trouvé' });
+        }
+    })
+};
+
+/* const UpdateExams = (req: Request, res: Response, next: NextFunction) => {
     const patientId = req.params.patientId
 
     return Patient.findById(patientId)
@@ -99,6 +117,21 @@ const UpdateExams = (req: Request, res: Response, next: NextFunction) => {
             res.status(404).json({ message: 'Patient non trouvé' })
         }
     })
+}; */
+
+const DeleteExam = (req: Request, res: Response, next: NextFunction) => {
+    const patientId = req.params.patientId;
+        var ObjectID = require('mongoose').Types.ObjectId;
+    const examId = new ObjectID(require('url').parse(req.url,true).query.examId);
+
+    return Patient.updateOne({ _id:patientId}, {
+        $pull: {
+            exams: {_id:examId},
+        },
+    })
+    .then(patient => patient ? res.status(200).json({ message: `Examen ${examId} supprimé`, patient }): res.status(404).json({ message: 'Examen non trouvé' }))
+    .catch(error => res.status(500).json({error}));
+
 };
 
 const DeletePatient = (req: Request, res: Response, next: NextFunction) => {
@@ -106,7 +139,7 @@ const DeletePatient = (req: Request, res: Response, next: NextFunction) => {
 
     return Patient.findByIdAndDelete(patientId)
     .then(patient => patient ? res.status(200).json({ message: 'Patient supprimé' }) : res.status(404).json({ message: 'Patient non trouvé' }))
-    .catch(error => res.status(500).json({error}));
+    .catch(error => res.status(500).json({message: error}));
 };
 
 const DeleteAllExams = (req: Request, res: Response, next: NextFunction) => {
@@ -124,7 +157,7 @@ const DeleteAllExams = (req: Request, res: Response, next: NextFunction) => {
     })
 }
 
-const TestTypeChecking = (req: Request, res: Response, next: NextFunction) => {
+/* const TestTypeChecking = (req: Request, res: Response, next: NextFunction) => {
     
     try
     {   
@@ -141,6 +174,6 @@ const TestTypeChecking = (req: Request, res: Response, next: NextFunction) => {
     {
         return res.status(500).json({ message: "La requête n'est pas du bon type" })
     }
-}
+} */
 
-export default {createPatient, readAllPatient, readPatient, UpdatePatient, UpdateExams, DeletePatient, DeleteAllExams, TestTypeChecking};
+export default {createPatient, readAllPatient, readPatient, UpdatePatient, UpdateExams, DeletePatient, DeleteAllExams, DeleteExam};

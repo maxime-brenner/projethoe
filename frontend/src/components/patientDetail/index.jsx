@@ -18,18 +18,13 @@ function PatientDetail () {
         exams:[{}],
     }); 
 
-    const [orderedExams, setOrderedExams] = useState({})
-    const [selectedExam, setSelectedExam] = useState('')
-    const [chartExam, setChartExam] = useState([])
-    const [isFetching, setIsFetching] = useState(false)
+    const [orderedExams, setOrderedExams] = useState({});
+    const [selectedExam, setSelectedExam] = useState('');
+    const [isFetching, setIsFetching] = useState(false);
 
     const form = useFormik(examForm());
 
     useEffect (() => {getPatient()}, [isFetching]);
-
-    /* const prepareExamForChart = (array) => {
-        const prepared = array.reduce((acc, ))
-    } */
 
     const getPatient = async () => {
         const response = await axios.get(`http://localhost:9090/patient/get/${patientId}`);

@@ -7,6 +7,7 @@ import PatientDetail from './components/patientDetail';
 import CodePage from './components/code';
 import NavBar from './components/navBar';
 import MedicamentsPage from './components/medicaments';
+import ExamsCatalogPage from './components/examCatalogPage';
 
 const rooter = Router([
   {
@@ -24,7 +25,11 @@ const rooter = Router([
   {
     path:"/medoc/",
     element:<MedicamentsPage/>
-  }
+  },
+  {
+    path:"/biologie/",
+    element:<ExamsCatalogPage/>
+  },
 ]);
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
