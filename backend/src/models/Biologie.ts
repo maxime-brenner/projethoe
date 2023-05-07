@@ -28,9 +28,6 @@ const ExamRefSchema: Schema = new Schema(
         units: [String],
         minDefault: {type: Number, require:false},
         maxDefault: {type: Number, require:false},
-        value: {type: Number, require: true},
-        date: {type: Date, require: true},
-        patient: {type: Schema.Types.ObjectId, require: true},
     },
     {
         versionKey: false
@@ -49,9 +46,11 @@ const ExamUniqueSchema: Schema = new Schema(
     }
     
 )
-
 const ExamPatientSchema: Schema = new Schema (
-    {
+    {   name: {type: String, require: true},
+        units: [String],
+        minDefault: {type: Number, require:false},
+        maxDefault: {type: Number, require:false},
         data: {type: Array<IExamUnique>, default:[]},
     }
 )

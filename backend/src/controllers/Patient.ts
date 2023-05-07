@@ -2,10 +2,11 @@ import { NextFunction, Request, Response, request} from "express";
 import mongoose from "mongoose";
 import Patient from "../models/Patient";
 import { IPatientModel } from "../models/Patient";
+import { IExamPatientModel, IExamRefModel, IExamUniqueModel } from "../models/Biologie";
 import { Schema } from "mongoose";
 import { exist } from "joi";
 
-const {ExamenPatient} = require('../models/Biologie');
+const {ExamenRef, ExamenUnique, ExamenPatient} = require('../models/Biologie');
 
 const createPatient = (req: Request, res: Response, next: NextFunction) => {
     const { name, firstName, birthDate} = req.body;
@@ -63,11 +64,34 @@ const UpdateExams = (req: Request, res: Response, next: NextFunction) => {
     .then((pat) => {
         if (pat) 
         {   
-            const check= pat.exams.find((obj) => {obj._id===req.body;});
-            if (check){
-                return res.json({message: 'l examen existe', body:req.body, exam:pat.exams, condition:check});
+            const check = pat.exams.findIndex(obj => obj.name === req.body.name);
+            if (!check){
+                const {name, units, minDefault, maxDefault, data} = req.body
+                const newExam = new ExamenPatient({
+                    name,
+                    units,
+                    minDefault,
+                    maxDefault,
+                    data,
+                });
+                pat.exams.push(newExam);
+                return pat.save()
+                .then((exam) => res.status(200).json({message: `l examen ${name} a été créé`, patient:pat}))
+                .catch(error => res.json({ error: error }))
             } else {
-                return res.json({message: 'l examen n existe pas', body:req.body, exam:pat.exams, condition:check});
+                const {value, unit, date, patient} = req.body.data
+                const newValue: IExamUniqueModel = new ExamenUnique ({
+                    value,
+                    unit,
+                    date,
+                    patient
+                });
+                /* check.data.push(newValue); */
+                pat.exams[check].data.push(newValue); 
+                pat.markModified('exams');
+                return pat.save()
+                .then((exam) => res.status(200).json({ message: 'Nouvelle valeur ajoutée', patient:pat, check:check, exam:exam.exams[check] }))
+                .catch(error => res.json({ message : error }));
             }         
         }
         else
