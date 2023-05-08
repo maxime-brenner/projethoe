@@ -15,34 +15,36 @@ function PatientDetail () {
         name: '',
         firstName:'',
         birthDate:'',
-        exams:[{}],
+        exams:[{data:[{value:null}]}],
     }); 
 
     const [orderedExams, setOrderedExams] = useState({});
-    const [selectedExam, setSelectedExam] = useState('');
     const [isFetching, setIsFetching] = useState(false);
+    const [examsCatalog, setExamsCatalog] = useState([]);
+    const [selectedExamCatalog, setSelectedExamCatalog] = useState({});
 
     const form = useFormik(examForm());
 
     useEffect (() => {getPatient()}, [isFetching]);
+    useEffect (() => {getExamsCatalog()}, []);
 
     const getPatient = async () => {
         const response = await axios.get(`http://localhost:9090/patient/get/${patientId}`);
         const patient = response.data.patient;
         setPatientDetail(patient);
-
-        const orderingExams = patient.exams.reduce((acc, obj) => {
-                var cle = obj.name;
-                if (!acc[cle]) {
-                    acc[cle] = [];
-                }
-                acc[cle].push(obj);
-                return acc;
-            }, {});
+        patient.exams.map((exam) => {
+            exam.data.sort((a, b) => {return new Date(a.date)- new Date(b.date)})
+        });
          
-        setOrderedExams(orderingExams);
-        console.log(orderedExams); 
+        /* setOrderedExams(orderingExams);
+        console.log(orderedExams);  */
         };
+
+    const getExamsCatalog = async () => {
+        const response = await axios.get(`http://localhost:9090/biologie/all-exams/`);
+        setExamsCatalog(response.data.exam);
+        console.log(examsCatalog);
+       }
 
     const handleSubmit = () => {
         setIsFetching(true);
@@ -50,9 +52,19 @@ function PatientDetail () {
         setIsFetching(false);
     }
 
+    const handleSelectedExamCatalog = e => {
+        const selectedExam = examsCatalog.find(el => e.target.value === el.name);
+        if (selectedExam) {
+            setSelectedExamCatalog(selectedExam);
+        } else {
+            setSelectedExamCatalog({});
+        };
+        console.log('selectedExam', selectedExamCatalog);
+    }
+
 
     const htmlForm = (form, examCatalog) => {
-        form.values.name=examCatalog.name;
+        form.values.name=selectedExamCatalog.name;
         form.values.patient=patientDetail._id;
         console.log(form.values)
         return (
@@ -111,31 +123,34 @@ function PatientDetail () {
                     
                     <h2>Liste des examens</h2>
                         <ul>
-                            {Object.entries(orderedExams).map(([key]) => {
+                            {/* {Object.entries(orderedExams).map(([key]) => {
                                 const latest = orderedExams[key][0];
                                 console.log("latest",key);
                                 return (<li key={key.toLowerCase()}>{key} = {latest.value} {latest.units} {new Date(latest.date).toLocaleDateString()}<Button color='danger' size='sm' onClick={() => {deleteExamOnClick(patientDetail._id, latest._id)} }>-</Button></li>)
                             })
-                            }
+                            } */}
+                            {patientDetail.exams.map((exam) => {
+                                console.log('exam',exam);
+                                console.log('ordered exam', orderedExams)
+                                return <li key={exam._id}>{exam.name} {exam.data.slice(-1)[0].value}</li>;
+                            })}
                         </ul>
-                        <ul>
-                            {examsData.map((examCatalog) => {
+                    <h2>Ajouter un examen</h2>
+                        <select onChange={(e) => handleSelectedExamCatalog(e)}>
+                            <option></option>
+                            {examsCatalog.map((exam) => {
                                 
-                                return <li className={examCatalog.name.toLowerCase()} key={examCatalog.index}>
-                                            <h3 >{examCatalog.name}</h3>
-                                            <Button color='warning' size='sm' onClick={() => {setSelectedExam(examCatalog.name.toLowerCase())}}>+</Button>
-                                            {selectedExam===examCatalog.name.toLowerCase() ? 
-                                            htmlForm(form, examCatalog)
-                                            :null}
-                                        </li>
-                            }
-                            
-                            )}
-                        </ul>
+                                return <option key={exam._id}>{exam.name}</option>
+                            })}
+                        </select>
+                        <h3>{selectedExamCatalog.name ? selectedExamCatalog.name : "Sélectionnez un examen"}</h3>
+                        {selectedExamCatalog.name ?  htmlForm(form, selectedExamCatalog) : null }
                 </Col>
                 <Col>
-                    <LineChart width={600} height={300} data={patientDetail.exams}>
-                        <Line type="monotone" dataKey="value" stroke="#8884d8" />
+                    <LineChart width={600} height={300} >
+                        {patientDetail.exams.map((exam) => {
+                            return <Line data={exam.data} type="monotone" dataKey="value" stroke="#8884d8" />;
+                        })}
                         <CartesianGrid stroke="#ccc" />
                         <XAxis dataKey="date" />
                         <YAxis />

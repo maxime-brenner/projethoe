@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Label, Input, Button, Col, Row } from "reactstrap";
+import {Form, FormGroup, Label, Input, Button, Row, Col} from "reactstrap";
+import { useFormik } from 'formik';
 
 function MedicamentsPage () {
 
@@ -8,10 +9,9 @@ function MedicamentsPage () {
     const [userResearchMedoc, setUserResearchMedoc] = useState([]);
     const [selectedMedoc, setSelectedMedoc] = useState([]);
     const [filteredResearch, setFilteredResearch] = useState([]);
-
-    
     
     const medoc = (research) => {
+        if (research && research.length>3){
         axios.get(`http://localhost:3004/api/medicaments?nom=${research}`)
         .then((medoc) => {
             setUserResearchMedoc(medoc.data);
@@ -31,6 +31,7 @@ function MedicamentsPage () {
             }; */
         })
         .catch((error) => console.log(error))
+        };
     }
 
     const handleResearch = (e) => {
@@ -39,9 +40,73 @@ function MedicamentsPage () {
         console.log(userResearch)
     }
 
-    const handleMedoc = (medocName) => {
+    const handleMedoc = (form, medocName) => {
         setSelectedMedoc([...selectedMedoc, medocName]);
         console.log(selectedMedoc);
+    }
+
+    const prescriptionForm = (medoc) => {
+        const frequency = ["/jour", "/semaine", "/mois", "/3mois"];
+        return(
+            <Form className="prescription-form">
+                <h3>{medoc.name}</h3>
+                <FormGroup>
+                    <h3>Posologie</h3>
+                    <Row>
+                        <Col>
+                            <Label for="matin">Matin</Label>
+                            <Input
+                            id="matin"
+                            type="value"
+                            name='matin-value'
+                            style={{width:"20%"}}
+                            >
+                            </Input>
+                        </Col>
+                        <Col>
+                            <Label for="midi">Midi</Label>
+                            <Input
+                            id="midi"
+                            type="value"
+                            name='midi-value'
+                            style={{width:"20%"}}
+                            >
+                            </Input>
+                        </Col>
+                        <Col>
+                            <Label for="soir">Soir</Label>
+                            <Input
+                            id="soir"
+                            type="value"
+                            name='soir-value'
+                            style={{width:"20%"}}
+                            >
+                            </Input>
+                        </Col>
+                        <Col>
+                            <Label for="nuit">Nuit</Label>
+                            <Input
+                            id="nuit"
+                            type="value"
+                            name='nuit-value'
+                            style={{width:"20%"}}
+                            >
+                            </Input>
+                        </Col>
+                    </Row>
+                </FormGroup>
+                <FormGroup>
+                    <h3>Fréquence</h3>
+                    <select>
+                        <option></option>
+                        {frequency.map((freq, id) => {
+                            return <option key={id}>{freq}</option>
+                        })}
+                    </select>
+                </FormGroup>
+                <Button color='danger' size='sm' type='submit' >Envoyer</Button>
+            </Form>
+        )
     }
 
     useEffect(() => {medoc()}, [])
@@ -55,16 +120,24 @@ function MedicamentsPage () {
                     <Input type="string" style={{width:'50%'}} onChange={handleResearch}></Input>
                     <ul>
                         {(userResearchMedoc[0]) ? userResearchMedoc.map((medoc) => {
-                            return <li key={medoc.cis} > {medoc.nom}, {medoc.composition[0].denominationSubstance}, {medoc.composition[0].etatCommercialisation}<Button color='warning' size='sm' onClick={() => handleMedoc(medoc.nom)}>+</Button> </li>
+                            return <li key={medoc.cis} > {medoc.nom}, {medoc.nom.match('\\d+')[0]}, {medoc.composition[0].denominationSubstance}, {medoc.composition[0].etatCommercialisation}<Button color='warning' size='sm' onClick={() => handleMedoc(medoc.nom)}>+</Button> </li>
                         })
                             :<p>Pas de molécule de ce nom</p>}
                     </ul>
                 </Col>
-                <Col>
+                <Row>
+                    <Col>
                         {selectedMedoc.map((medoc) => {
                             return <li key={medoc.indexOf(medoc)}>{medoc}</li>
                         })}
-                </Col>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
+                        {prescriptionForm({name:"Metformine"})}
+                    </Col>
+                </Row>
+                
             </Row>
         </main>
     )

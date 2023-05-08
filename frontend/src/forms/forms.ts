@@ -14,9 +14,12 @@ const submitExam = (values:any) => {
     .patch(`http://localhost:9090/patient/update/exams/${values.patient}`,
     {
         name:values.name,
-        units:[values.units],
-        value:values.value,
-        date:values.date,
+        data:{
+            value:values.value,
+            unit:values.units,
+            date:values.date,
+            patient:values.patient
+        },
         patient:values.patient
     })
     .then((res) => console.log(res.status))
@@ -25,7 +28,7 @@ const submitExam = (values:any) => {
 
 const examForm = () => {
     return {
-    initialValues: {name:'', units: '', value: '', date: '', patient:''},
+    initialValues: {name:'', units: '', value: null, date: '', patient:''},
     onSubmit: (values:any) => {submitExam(values)},
     validationSchema: Yup.object({
         name: Yup.string().trim().required("Nom requis"),

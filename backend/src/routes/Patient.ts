@@ -8,6 +8,7 @@ router.get('/get/:patientId', controller.readPatient);
 router.get('/get/', controller.readAllPatient);
 router.patch('/update/:patientId', controller.UpdatePatient);
 router.patch('/update/exams/:patientId', controller.UpdateExams);
+router.patch('/update/treatment/:patientId', controller.UpdateTreatment);
 router.delete('/delete/:patientId', controller.DeletePatient);
 router.patch('/delete/exams/:patientId', controller.DeleteAllExams);
 router.patch('/delete/exam/:patientId', controller.DeleteExam);

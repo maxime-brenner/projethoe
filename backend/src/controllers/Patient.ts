@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import Patient from "../models/Patient";
 import { IPatientModel } from "../models/Patient";
 import { IExamPatientModel, IExamRefModel, IExamUniqueModel } from "../models/Biologie";
+import IMedicamentPosologie from "../models/Medicament";
 import { Schema } from "mongoose";
 import { exist } from "joi";
 
@@ -64,22 +65,30 @@ const UpdateExams = (req: Request, res: Response, next: NextFunction) => {
     .then((pat) => {
         if (pat) 
         {   
-            const check = pat.exams.findIndex(obj => obj.name === req.body.name);
+            const check = pat.exams.find(obj => obj.name === req.body.name);
             if (!check){
-                const {name, units, minDefault, maxDefault, data} = req.body
-                const newExam = new ExamenPatient({
-                    name,
-                    units,
-                    minDefault,
-                    maxDefault,
-                    data,
+                const {name, patient} = req.body;
+                const {value, unit, date} = req.body.data;
+                const newValue: IExamUniqueModel = new ExamenUnique ({
+                    value,
+                    unit,
+                    date,
+                    patient
                 });
+                const newExam: IExamPatientModel = new ExamenPatient({
+                    name,
+                    data:[newValue],
+                    patient,
+                });
+                
+
                 pat.exams.push(newExam);
+
                 return pat.save()
                 .then((exam) => res.status(200).json({message: `l examen ${name} a été créé`, patient:pat}))
                 .catch(error => res.json({ error: error }))
             } else {
-                const {value, unit, date, patient} = req.body.data
+                const {value, unit, date, patient} = req.body.data;
                 const newValue: IExamUniqueModel = new ExamenUnique ({
                     value,
                     unit,
@@ -87,10 +96,11 @@ const UpdateExams = (req: Request, res: Response, next: NextFunction) => {
                     patient
                 });
                 /* check.data.push(newValue); */
-                pat.exams[check].data.push(newValue); 
+                check.data.push(newValue);
+                check.data.sort((a,b) => {return a.date.getUTCMilliseconds() - b.date.getUTCMilliseconds()}); 
                 pat.markModified('exams');
                 return pat.save()
-                .then((exam) => res.status(200).json({ message: 'Nouvelle valeur ajoutée', patient:pat, check:check, exam:exam.exams[check] }))
+                .then((exam) => res.status(200).json({ message: 'Nouvelle valeur ajoutée', patient:pat, check:check, exam:exam.exams }))
                 .catch(error => res.json({ message : error }));
             }         
         }
@@ -99,6 +109,24 @@ const UpdateExams = (req: Request, res: Response, next: NextFunction) => {
             res.status(404).json({ message: 'Patient non trouvé' });
         }
     })
+};
+
+const UpdateTreatment = (req: Request, res: Response, next: NextFunction) => {
+    const patientId = req.params.patientId;
+
+    return Patient.findById(patientId)
+    .then((pat) => {
+        if (pat){
+            try {
+               const {name, doseUnitaire, formeGalenique, posologie, frequency} = req.body;
+                const treatment = new IMedicamentPosologie(name, doseUnitaire, formeGalenique, posologie, frequency);
+                res.json({ msg: treatment }); 
+            } catch(e){
+                res.json({"Erreur lors de la construction de l'instance": typeof(e)})
+            }
+        }
+    })
+    .catch(error => res.json({msg : error}))
 };
 
 /* const UpdateExams = (req: Request, res: Response, next: NextFunction) => {
@@ -200,4 +228,4 @@ const DeleteAllExams = (req: Request, res: Response, next: NextFunction) => {
     }
 } */
 
-export default {createPatient, readAllPatient, readPatient, UpdatePatient, UpdateExams, DeletePatient, DeleteAllExams, DeleteExam};
+export default {createPatient, readAllPatient, readPatient, UpdatePatient, UpdateExams, UpdateTreatment, DeletePatient, DeleteAllExams, DeleteExam};
