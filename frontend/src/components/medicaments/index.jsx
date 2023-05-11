@@ -3,13 +3,14 @@ import { useEffect, useState } from "react";
 import {Form, FormGroup, Label, Input, Button, Row, Col} from "reactstrap";
 import { useFormik } from 'formik';
 import prescriptionForm from "../../forms/prescriptionForm.ts";
+import { func } from "joi";
 
 function MedicamentsPage () {
 
     const [userResearch, setUserResearch] = useState('');
     const [userResearchMedoc, setUserResearchMedoc] = useState([]);
     const [selectedMedoc, setSelectedMedoc] = useState({});
-    const [filteredResearch, setFilteredResearch] = useState([]);
+    const [treatment, setTreament] = useState([]);
 
     const form = useFormik(prescriptionForm());
     
@@ -48,6 +49,20 @@ function MedicamentsPage () {
         console.log("selectedMedoc",selectedMedoc);
     }
 
+    const handlePosoChange = (e) => {
+        const array=form.values.posologie;
+        const exist = array.find(el => el.moment===e.target.name);
+        exist ? exist.quantity=e.target.value
+        :form.values.posologie.push({moment:e.target.name, quantity:e.target.value})
+        console.log(form.values.posologie)
+    }
+
+    const handleTreament = (e) => {
+        setTreament([...treatment, form.values]);
+        console.log("treatment",treatment);
+        e.preventDefault();
+    }
+
     const prescriptionFormHTML = (form, selectedMedoc) => {
         form.values.name=selectedMedoc.nom;
         form.values.doseUnitaire=selectedMedoc.nom.match('\\d+')[0];
@@ -55,7 +70,7 @@ function MedicamentsPage () {
         const frequency = ["/jour", "/semaine", "/mois", "/3mois"];
         console.log(form.values)
         return(
-            <Form className="prescription-form">
+            <Form className="prescription-form" onSubmit={handleTreament}>
                 <h3>{selectedMedoc.nom}</h3>
                 <FormGroup>
                     <h3>Posologie</h3>
@@ -64,9 +79,10 @@ function MedicamentsPage () {
                             <Label for="matin">Matin</Label>
                             <Input
                             id="matin"
-                            type="value"
-                            name='matin-value'
+                            type="number"
+                            name='matin'
                             style={{width:"20%"}}
+                            onChange={(e) => handlePosoChange(e)}
                             >
                             </Input>
                         </Col>
@@ -74,9 +90,10 @@ function MedicamentsPage () {
                             <Label for="midi">Midi</Label>
                             <Input
                             id="midi"
-                            type="value"
-                            name='midi-value'
+                            type="number"
+                            name='midi'
                             style={{width:"20%"}}
+                            onChange={(e) => handlePosoChange(e)}
                             >
                             </Input>
                         </Col>
@@ -84,9 +101,10 @@ function MedicamentsPage () {
                             <Label for="soir">Soir</Label>
                             <Input
                             id="soir"
-                            type="value"
-                            name='soir-value'
+                            type="number"
+                            name='soir'
                             style={{width:"20%"}}
+                            onChange={(e) => handlePosoChange(e)}
                             >
                             </Input>
                         </Col>
@@ -94,9 +112,10 @@ function MedicamentsPage () {
                             <Label for="nuit">Nuit</Label>
                             <Input
                             id="nuit"
-                            type="value"
+                            type="number"
                             name='nuit-value'
                             style={{width:"20%"}}
+                            onChange={(e) => handlePosoChange(e)}
                             >
                             </Input>
                         </Col>
@@ -111,7 +130,7 @@ function MedicamentsPage () {
                         })}
                     </select>
                 </FormGroup>
-                <Button color='danger' size='sm' type='submit' >Envoyer</Button>
+                <Button color='danger' size='sm' type='submit'>Envoyer</Button>
             </Form>
         )
     }
@@ -134,14 +153,16 @@ function MedicamentsPage () {
                 </Col>
                 <Row>
                     <Col>
-                        {/* {selectedMedoc.map((medoc, id) => {
-                            return <li key={id}>{medoc}</li>;
-                        })} */}
+                        <ul>
+                            {treatment.map((med) => {
+                                return <li>{med.name} Prendre {med.posologie.map((el) => <nobr><p>{el.quantity} comprimé(s) le {el.moment} </p></nobr>)}{med.frequency}</li>
+                            })}
+                        </ul>
                     </Col>
                 </Row>
                 <Row>
                     <Col>
-                        {prescriptionFormHTML(form, selectedMedoc)}
+                        {selectedMedoc.nom ? prescriptionFormHTML(form, selectedMedoc):null}
                     </Col>
                 </Row>
                 
