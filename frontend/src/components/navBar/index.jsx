@@ -22,10 +22,15 @@ function NavBar(args) {
   return (
     <div>
       <Navbar {...args} color='dark' dark>
-        <NavbarBrand href="/all-patients/">Projet HOE</NavbarBrand>
+        <NavbarBrand href="/">Projet HOE</NavbarBrand>
         <NavbarToggler onClick={toggle} />
         <Collapse isOpen={isOpen} navbar>
           <Nav className="me-auto" navbar>
+            <NavItem>
+              <NavLink href="/all-patients/">
+                Patients
+              </NavLink>
+            </NavItem>
             <NavItem>
               <NavLink href="/code-manager/">
                 CIM-11

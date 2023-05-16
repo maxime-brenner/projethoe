@@ -8,11 +8,16 @@ import CodePage from './components/code';
 import NavBar from './components/navBar';
 import MedicamentsPage from './components/medicaments';
 import ExamsCatalogPage from './components/examCatalogPage';
+import Home from './components/home';
 
 const rooter = Router([
   {
     path:"/all-patients/",
     element: <PatientsList />,
+  },
+  {
+    path:"/",
+    element: <Home />,
   },
   {
     path:"/patient-id/:patientId",

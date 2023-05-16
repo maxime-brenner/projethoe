@@ -120,7 +120,11 @@ const UpdateTreatment = (req: Request, res: Response, next: NextFunction) => {
             try {
                const {name, doseUnitaire, formeGalenique, posologie, frequency} = req.body;
                 const treatment = new IMedicamentPosologie(name, doseUnitaire, formeGalenique, posologie, frequency);
-                res.json({ msg: treatment }); 
+                pat.treatment.push(treatment);
+                pat.markModified('treatment');
+                return pat.save()
+                .then((treatment) => res.json({ msg: "Traitement mis à jour", treatment:treatment }))
+                .catch(error => res.json({ msg: error })); 
             } catch(e){
                 res.json({"Erreur lors de la construction de l'instance": typeof(e)})
             }

@@ -16,9 +16,9 @@ function MedicamentsPage () {
     
     const medoc = (research) => {
         if (research && research.length>3){
-        axios.get(`http://localhost:3004/api/medicaments?nom=${research}`)
+        axios.get(`http://localhost:3004/medoc/?name=${research}`)
         .then((medoc) => {
-            setUserResearchMedoc(medoc.data);
+            setUserResearchMedoc(medoc.data.Message);
             console.log(userResearchMedoc)
             /* for (const el in userResearchMedoc[0]){
                 const filtered = userResearchMedoc[0].reduce((acc, item) => {
@@ -64,14 +64,14 @@ function MedicamentsPage () {
     }
 
     const prescriptionFormHTML = (form, selectedMedoc) => {
-        form.values.name=selectedMedoc.nom;
-        form.values.doseUnitaire=selectedMedoc.nom.match('\\d+')[0];
-        form.values.formeGalenique=selectedMedoc.composition[0].etatCommercialisation;
+        form.values.name=selectedMedoc.name;
+        form.values.doseUnitaire=selectedMedoc.doseUnitaire;
+        form.values.formeGalenique=selectedMedoc.formeGalenique;
         const frequency = ["/jour", "/semaine", "/mois", "/3mois"];
         console.log(form.values)
         return(
-            <Form className="prescription-form" onSubmit={handleTreament}>
-                <h3>{selectedMedoc.nom}</h3>
+            <Form className="prescription-form" onSubmit={form.handleSubmit(form.values)}>
+                <h3>{selectedMedoc.name}</h3>
                 <FormGroup>
                     <h3>Posologie</h3>
                     <Row>
@@ -145,8 +145,8 @@ function MedicamentsPage () {
                     <Label>Rechercher un médicament</Label>
                     <Input type="string" style={{width:'50%'}} onChange={handleResearch}></Input>
                     <ul>
-                        {(userResearchMedoc[0]) ? userResearchMedoc.map((medoc) => {
-                            return <li key={medoc.cis} > {medoc.nom}, {medoc.nom.match('\\d+')[0]}, {medoc.composition[0].denominationSubstance}, {medoc.composition[0].etatCommercialisation}<Button color='warning' size='sm' onClick={() => handleMedoc(medoc)}>+</Button> </li>
+                        {(userResearchMedoc[0]) ? userResearchMedoc.map((medoc, index) => {
+                            return <li key={index} > {medoc.name}, {medoc.doseUnitaire}, {medoc.formeGalenique}<Button color='warning' size='sm' onClick={() => handleMedoc(medoc)}>+</Button> </li>
                         })
                             :<p>Pas de molécule de ce nom</p>}
                     </ul>
@@ -162,7 +162,7 @@ function MedicamentsPage () {
                 </Row>
                 <Row>
                     <Col>
-                        {selectedMedoc.nom ? prescriptionFormHTML(form, selectedMedoc):null}
+                        {selectedMedoc.name ? prescriptionFormHTML(form, selectedMedoc):null} 
                     </Col>
                 </Row>
                 
