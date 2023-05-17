@@ -6,6 +6,7 @@ import examsData from '../../features/examsData';
 import {Form, FormGroup, Label, Input, Button, Row, Col} from "reactstrap";
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
 import examForm from '../../forms/forms.ts';
+import MedicamentsPage from '../medicaments';
 
 function PatientDetail () {
     const params = useParams();
@@ -157,6 +158,24 @@ function PatientDetail () {
                         <Tooltip />
                     </LineChart>
                 </Col>
+            </Row>
+            <Row>
+                <h2>Liste de straitements</h2>
+                <ul>
+                {patientDetail.treatment ? patientDetail.treatment.map((medoc, id) => {
+                    const tab=[];
+                    for (const poso of medoc.posologie){
+                        const verbose=String(poso.quantity)+" "+medoc.formeGalenique+" "+poso.moment;
+                        console.log("verbose", verbose, String(poso.quantity), poso.moment)
+                        tab.push(verbose);
+                    }
+                   const posoVerbose = tab.join();
+                   return <li key={id}>{medoc.name}: {posoVerbose}</li>
+                }) :null}
+                </ul>
+            </Row>
+            <Row>
+                <MedicamentsPage />
             </Row>
         </main>
     )

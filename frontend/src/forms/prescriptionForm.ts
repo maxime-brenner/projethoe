@@ -4,13 +4,13 @@ const submitPrescription = (values: any) => {
     axios
     .patch(`http://localhost:9090/patient/update/treatment/643b231338b017d1dc620862`,
     {
-        /* name: values.name,
+        name: values.name,
         doseUnitaire: values.doseUnitaire,
         formeGalenique: values.formeGalenique,
         posologie: values.posologie,
-        frequency: values.frequency */
+        frequency: values.frequency
     })
-    .then((res) => console.log(res.status, values))
+    .then((res) => console.log("Traitement mis à jour",res.status, values))
     .catch((err) => console.log(err));
 }
 

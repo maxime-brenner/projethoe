@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import {Form, FormGroup, Label, Input, Button, Row, Col} from "reactstrap";
 import { useFormik } from 'formik';
 import prescriptionForm from "../../forms/prescriptionForm.ts";
-import { func } from "joi";
+
 
 function MedicamentsPage () {
 
@@ -65,12 +65,12 @@ function MedicamentsPage () {
 
     const prescriptionFormHTML = (form, selectedMedoc) => {
         form.values.name=selectedMedoc.name;
-        form.values.doseUnitaire=selectedMedoc.doseUnitaire;
+        form.values.doseUnitaire=parseInt(selectedMedoc.doseUnitaire.match("\\d+")[0]);
         form.values.formeGalenique=selectedMedoc.formeGalenique;
         const frequency = ["/jour", "/semaine", "/mois", "/3mois"];
         console.log(form.values)
         return(
-            <Form className="prescription-form" onSubmit={form.handleSubmit(form.values)}>
+            <Form className="prescription-form" onSubmit={form.handleSubmit}>
                 <h3>{selectedMedoc.name}</h3>
                 <FormGroup>
                     <h3>Posologie</h3>

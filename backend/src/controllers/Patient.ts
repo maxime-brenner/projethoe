@@ -123,7 +123,7 @@ const UpdateTreatment = (req: Request, res: Response, next: NextFunction) => {
                 pat.treatment.push(treatment);
                 pat.markModified('treatment');
                 return pat.save()
-                .then((treatment) => res.json({ msg: "Traitement mis à jour", treatment:treatment }))
+                .then((treatment) => res.json({ msg: "Traitement mis à jour", treatment:treatment, pat:pat.firstName }))
                 .catch(error => res.json({ msg: error })); 
             } catch(e){
                 res.json({"Erreur lors de la construction de l'instance": typeof(e)})
